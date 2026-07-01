@@ -103,7 +103,7 @@ export default function App() {
         {tab === "program" && <ProgramView day={day} q={q} setQ={setQ} secFilter={secFilter} setSecFilter={setSecFilter}
           picked={picked} toggle={toggle} setDetail={setDetail} tickets={tickets} cycleTicket={cycleTicket} nowMin={nowMin} setNowMin={setNowMin} />}
         {tab === "plan"    && <PlanView day={day} picked={picked} toggle={toggle} setDetail={setDetail}
-          tickets={tickets} cycleTicket={cycleTicket} blocks={blocks} setBlocks={setBlocks} weather={weather} setWeather={setWeather} setTab={setTab} />}
+          tickets={tickets} cycleTicket={cycleTicket} blocks={blocks} setBlocks={setBlocks} weather={weather} setWeather={setWeather} setTab={setTab} ratings={ratings} rate={rate} />}
         {tab === "mapa"    && <MapView day={day} picked={picked} blocks={blocks} setDetail={setDetail} setTab={setTab} />}
         {tab === "okoli"   && <OkoliView day={day} picked={picked} blocks={blocks} favs={favs} toggleFav={toggleFav}
           weather={weather} setWeather={setWeather} nowMin={nowMin} setNowMin={setNowMin} />}

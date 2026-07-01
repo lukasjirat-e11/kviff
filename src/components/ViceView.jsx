@@ -1,44 +1,18 @@
 import { useState } from "react";
-import { FILMS, VENUES, TICKET } from "../data.js";
+import { VENUES, TICKET } from "../data.js";
 import { COLORS, S } from "../styles.js";
 
 export default function ViceView({ ratings, rate, setDetail, people, setPeople, expenses, setExpenses }) {
   const c = COLORS;
-  const [sub, setSub] = useState("denik");
-  const rated = Object.entries(ratings).filter(([, r]) => r.stars > 0).sort((a, b) => b[1].stars - a[1].stars);
-  const best = rated[0];
+  const [sub, setSub] = useState("utraty");
 
   return (
     <div style={{padding:"12px 14px 36px"}}>
       <div style={{display:"flex", gap:6, marginBottom:14}}>
-        {[["denik","Deník"],["utraty","Útraty"],["listky","Vstupenky"],["prakt","Praktické"]].map(([k, l]) => (
+        {[["utraty","Útraty"],["listky","Vstupenky"],["prakt","Praktické"]].map(([k, l]) => (
           <button key={k} onClick={() => setSub(k)} style={{...S.miniChip, flex:1, background:sub === k ? c.accent : "transparent", color:sub === k ? c.bg : c.muted, borderColor:sub === k ? c.accent : c.line}}>{l}</button>
         ))}
       </div>
-
-      {sub === "denik" && (
-        <div>
-          <h3 style={{...S.h3, marginTop:0}}>Můj festivalový deník</h3>
-          {rated.length === 0
-            ? <p style={{color:c.muted}}>Zatím žádné hodnocení. V detailu filmu dej hvězdy a poznámku — sejde se ti tu přehled.</p>
-            : <>
-                {best && <div style={{...S.bestCard, borderColor:c.accent, color:c.ink}}>🏆 Zatím nej: <b>{FILMS[best[0]].t}</b> · {best[1].stars}/5</div>}
-                <ul style={{listStyle:"none", margin:0, padding:0, display:"flex", flexDirection:"column", gap:8}}>
-                  {rated.map(([fid, r]) => (
-                    <li key={fid}>
-                      <button onClick={() => setDetail(fid)} style={{...S.denikRow, background:c.surface, borderColor:c.line, color:c.ink}}>
-                        <div style={{flex:1, minWidth:0}}>
-                          <div style={{fontWeight:700}}>{FILMS[fid].t}</div>
-                          {r.note && <div style={{...S.meta, color:c.muted}}>{r.note}</div>}
-                        </div>
-                        <div style={{color:c.accent, fontWeight:700, whiteSpace:"nowrap"}}>{"★".repeat(r.stars)}<span style={{color:c.line}}>{"★".repeat(5-r.stars)}</span></div>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </>}
-        </div>
-      )}
 
       {sub === "utraty" && <Expenses c={c} people={people} setPeople={setPeople} expenses={expenses} setExpenses={setExpenses} />}
 

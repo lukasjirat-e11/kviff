@@ -1,12 +1,17 @@
 import { useState } from "react";
-import { SECTIONS, VENUES, PLACES, CAT, TICKET } from "../data.js";
+import { SECTIONS, VENUES, PLACES, CAT, TICKET, PICKS, SCR } from "../data.js";
 import { toMin, fmtDur, endTime, segInfo, buildDayItems, walkFromVenue, openAt } from "../utils.js";
 import { COLORS, S } from "../styles.js";
+import Chip from "./Chip.jsx";
 
-export default function PlanView({ day, picked, toggle, setDetail, tickets, cycleTicket, blocks, setBlocks, weather, setWeather, setTab }) {
+export default function PlanView({ day, picked, toggle, setDetail, tickets, cycleTicket, blocks, setBlocks, weather, setWeather, setTab, ratings, rate }) {
   const c = COLORS;
   const [adding, setAdding] = useState(false);
-  const items = buildDayItems(day, picked, blocks);
+  const [planMode, setPlanMode] = useState("my");
+  const effectivePicked = planMode === "chceme"
+    ? new Set([...picked, ...SCR.filter(s => s.day === day && PICKS[s.f] === "yes").map(s => s.id)])
+    : picked;
+  const items = buildDayItems(day, effectivePicked, blocks);
   const films = items.filter(i => i.kind === "film");
   const totalRuntime = items.reduce((n, i) => n + (i.r || 0), 0);
 
@@ -19,6 +24,10 @@ export default function PlanView({ day, picked, toggle, setDetail, tickets, cycl
 
   return (
     <div style={{padding:"4px 0 30px"}}>
+      <div style={{...S.chipRow, padding:"8px 12px 4px"}}>
+        <Chip active={planMode === "my"} label="Můj plán" onClick={() => setPlanMode("my")} c={c} />
+        <Chip active={planMode === "chceme"} label="Chceme" dot={c.ok} onClick={() => setPlanMode("chceme")} c={c} />
+      </div>
       <div style={{...S.planTop}}>
         <span style={{color:c.muted, fontSize:13}}>
           {items.length ? `${items.length} položek · ${fmtDur(totalRuntime)}` : "Plán je prázdný"}
@@ -38,9 +47,10 @@ export default function PlanView({ day, picked, toggle, setDetail, tickets, cycl
       {items.length === 0 ? (
         <div style={{padding:"36px 22px", textAlign:"center", color:c.muted}}>
           <div style={{fontSize:38, marginBottom:8}}>🎬</div>
-          <p style={{margin:0, color:c.ink, fontWeight:600}}>Zatím tu nic není</p>
-          <p style={{marginTop:6}}>Přidej filmy a akce v Programu (<strong style={{color:c.accent}}>+</strong>). Sestaví se ti tu osa dne s přesuny, mezičasem i tipy na jídlo.</p>
-          <button onClick={() => setTab("program")} style={{...S.ghostBtn, color:c.accent, borderColor:c.accent}}>Otevřít program</button>
+          {planMode === "chceme"
+            ? <><p style={{margin:0, color:c.ink, fontWeight:600}}>Žádné "Chceme" filmy dnes</p><p style={{marginTop:6}}>Pro tento den nejsou v přípravce žádné tučně vyznačené filmy.</p></>
+            : <><p style={{margin:0, color:c.ink, fontWeight:600}}>Zatím tu nic není</p><p style={{marginTop:6}}>Přidej filmy a akce v Programu (<strong style={{color:c.accent}}>+</strong>). Sestaví se ti tu osa dne s přesuny, mezičasem i tipy na jídlo.</p><button onClick={() => setTab("program")} style={{...S.ghostBtn, color:c.accent, borderColor:c.accent}}>Otevřít program</button></>
+          }
         </div>
       ) : (
         <ol style={S.timeline}>
@@ -51,20 +61,26 @@ export default function PlanView({ day, picked, toggle, setDetail, tickets, cycl
             const bigGap = seg && seg.gap >= 45;
             return (
               <li key={it.id}>
-                <div style={{...S.tlCard, background:c.surface, borderColor: it.kind === "film" ? c.line : sec.color + "66"}}>
+                <div style={{...S.tlCard, background:c.surface, borderColor:c.line, borderLeft:`3px solid ${sec?.color || c.line}`}}>
                   <div style={{...S.tlTime, color:c.accent}}>{it.t}</div>
                   <button style={S.tlBody} onClick={() => it.kind === "film" ? setDetail(it.f) : null}>
                     <div style={S.title}>{it.kind !== "film" ? `${it.kind === "event" ? "🎉" : "📌"} ` : ""}{it.title}</div>
                     <div style={{...S.meta, color:c.muted}}>{it.r ? fmtDur(it.r) : "pásmo"} · konec ~{endTime(it.t, it.r||90)}</div>
                     <div style={S.tagRow}>
-                      <span style={{...S.sec, color:sec.color, borderColor:sec.color}}>{it.kind === "block" ? "Vlastní" : sec.name}</span>
                       <span style={{...S.ven, color:c.ink}}>📍 {it.kind === "block" && it.place ? it.place : ven.name}</span>
                       {tk && <span style={{...S.tkTag, color:TICKET[tk].c, borderColor:TICKET[tk].c}}>{TICKET[tk].i} {TICKET[tk].l}</span>}
                     </div>
                   </button>
                   <div style={{display:"flex", flexDirection:"column"}}>
                     {it.kind === "film" && <button onClick={() => cycleTicket(it.id)} style={{...S.tkBtn, color: tk ? TICKET[tk].c : c.muted, borderColor:c.line, flex:1}}>{tk ? TICKET[tk].i : "🎟"}</button>}
-                    <button onClick={() => it.kind === "block" ? removeBlock(it.id) : toggle(it.id)} style={{...S.addBtn, flex:1, background:c.accent, color:c.bg, borderColor:c.accent}}>✓</button>
+                    {(() => {
+                      const autoChceme = planMode === "chceme" && it.kind === "film" && PICKS[it.f] === "yes" && !picked.has(it.id);
+                      return <button onClick={() => it.kind === "block" ? removeBlock(it.id) : toggle(it.id)}
+                        title={autoChceme ? "Přidat i do mého plánu" : "Odebrat z plánu"}
+                        style={{...S.addBtn, flex:1, background: autoChceme ? "transparent" : c.accent, color: autoChceme ? c.ok : c.bg, borderColor: autoChceme ? c.ok : c.accent}}>
+                        {autoChceme ? "+" : "✓"}
+                      </button>;
+                    })()}
                   </div>
                 </div>
                 {seg && bigGap && <GapBlock seg={seg} from={it} weather={weather} c={c} setTab={setTab} />}
@@ -78,6 +94,26 @@ export default function PlanView({ day, picked, toggle, setDetail, tickets, cycl
       {items.length > 0 && !adding &&
         <button onClick={() => setAdding(true)} style={{...S.addBlockBtn, color:c.accent, borderColor:c.line}}>+ Přidat vlastní blok (večeře, sraz, pauza…)</button>}
       {adding && <BlockForm day={day} c={c} onCancel={() => setAdding(false)} onAdd={(b) => { setBlocks(x => [...x, b]); setAdding(false); }} />}
+
+      {films.length > 0 && rate && (
+        <div style={{padding:"0 12px 24px"}}>
+          <div style={{fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.08em", color:c.muted, padding:"16px 2px 8px"}}>Jak to bylo?</div>
+          {films.map(it => {
+            const r = (ratings || {})[it.f] || {};
+            return (
+              <div key={it.f} style={{display:"flex", alignItems:"center", gap:8, padding:"9px 0", borderBottom:`1px solid ${c.line}`}}>
+                <span style={{flex:1, color:c.ink, fontSize:13, fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap"}}>{it.title}</span>
+                <div style={{display:"flex", gap:1, flexShrink:0}}>
+                  {[1,2,3,4,5].map(n => (
+                    <button key={n} onClick={() => rate(it.f, r.stars === n ? 0 : n)}
+                      style={{background:"none", border:"none", fontSize:22, lineHeight:1, cursor:"pointer", padding:"0 2px", color:(r.stars||0) >= n ? c.accent : c.line}}>★</button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

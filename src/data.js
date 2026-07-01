@@ -91,6 +91,21 @@ export const EVById = Object.fromEntries(EVENTS.map(e => [e.id, e]));
 
 export const BADGE_LABELS = { must:"Tahák", cine:"Pro cinefily", classic:"Klasika", night:"Noční" };
 
+// Naše výběry z přípravky — yes = tučně v PDF (must see), maybe = ???, sary = ŠÁRY VARY (lze vidět i po)
+export const PICKS = {
+  // Chceme — tučně zvýrazněné v PDF
+  "50644":"yes","49419":"yes","50262":"yes","49934":"yes","50666":"yes",
+  "50659":"yes","49697":"yes","49174":"yes","50663":"yes","50651":"yes",
+  "50664":"yes","49679":"yes","50629":"yes","50535":"yes","49418":"yes",
+  "49696":"yes","50692":"yes",
+  // Možná — označené ???
+  "50667":"maybe","50653":"maybe","50634":"maybe","48467":"maybe","50660":"maybe",
+  "49467":"maybe","50251":"maybe","50526":"maybe","50528":"maybe","50602":"maybe",
+  "48448":"maybe","50536":"maybe","50630":"maybe","49425":"maybe",
+  // Šáry vary — ŠARY VARY v PDF, ale ne tučné
+  "50662":"sary","48780":"sary","49760":"sary","50513":"sary","49310":"sary",
+};
+
 export const TICKET = {
   want: { i:"◷",   l:"chci",      c:"#E8A33D" },
   have: { i:"🎟️", l:"mám",       c:"#6FB36F" },

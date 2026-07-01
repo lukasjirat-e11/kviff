@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { SECTIONS, VENUES, EVENTS, EVENT_EMOJI, FILMS, SCR, BADGE_LABELS, TICKET, TIME_GROUPS } from "../data.js";
+import { SECTIONS, VENUES, EVENTS, EVENT_EMOJI, FILMS, SCR, BADGE_LABELS, TICKET, TIME_GROUPS, PICKS } from "../data.js";
 import { toMin, minToStr, badgeColor } from "../utils.js";
 import { COLORS, S } from "../styles.js";
 import Chip from "./Chip.jsx";
@@ -7,22 +7,22 @@ import Chip from "./Chip.jsx";
 export default function ProgramView({ day, q, setQ, secFilter, setSecFilter, picked, toggle, setDetail, tickets, cycleTicket, nowMin, setNowMin }) {
   const c = COLORS;
   const [nowOn, setNowOn] = useState(false);
-  const [badgeFilter, setBadgeFilter] = useState("");
+  const [pickFilter, setPickFilter] = useState("");
 
   const items = useMemo(() => {
     const films = SCR.filter(s => s.day === day).map(s => {
       const f = FILMS[s.f];
-      return { id:s.id, t:s.t, v:s.v, kind:"film", f:s.f, title:f.t, dir:f.d, sec:f.s, r:f.r, badge:f.b, disc:s.disc };
+      return { id:s.id, t:s.t, v:s.v, kind:"film", f:s.f, title:f.t, dir:f.d, sec:f.s, r:f.r, badge:f.b, disc:s.disc, pick:PICKS[s.f]||"" };
     });
     const evs = EVENTS.filter(e => e.day === day).map(e => (
       { id:e.id, t:e.t, v:e.v, kind:"event", title:e.title, sec:"AKCE", r:e.r, ecat:e.cat }
     ));
     return [...films, ...evs]
       .filter(it => !secFilter || it.sec === secFilter)
-      .filter(it => !badgeFilter || it.badge === badgeFilter)
+      .filter(it => !pickFilter || (pickFilter === "our" ? !!it.pick : it.pick === pickFilter))
       .filter(it => { if (!q) return true; const k = q.toLowerCase(); return it.title.toLowerCase().includes(k) || (it.dir||"").toLowerCase().includes(k); })
       .sort((a, b) => toMin(a.t) - toMin(b.t));
-  }, [day, q, secFilter, badgeFilter]);
+  }, [day, q, secFilter, pickFilter]);
 
   const soon = items.filter(it => { const m = toMin(it.t); return m >= nowMin && m <= nowMin + 90; });
   const grouped = TIME_GROUPS
@@ -43,12 +43,12 @@ export default function ProgramView({ day, q, setQ, secFilter, setSecFilter, pic
           </div>
           <div style={S.cardBody}>
             <div style={S.titleRow}>
+              {it.pick === "yes" && <span style={{display:"inline-block", width:7, height:7, borderRadius:"50%", background:c.ok, marginRight:5, flexShrink:0, alignSelf:"center"}} />}
               <span style={S.title}>{it.kind === "event" ? `${EVENT_EMOJI[it.ecat]} ` : ""}{it.title}</span>
               {it.badge && <span style={{...S.badge, background:badgeColor(it.badge), color:"#14110F"}}>{BADGE_LABELS[it.badge]}</span>}
             </div>
             {it.dir && <div style={{...S.meta, color:c.muted}}>{it.dir}</div>}
             <div style={S.tagRow}>
-              <span style={{...S.sec, color:sec.color, borderColor:sec.color}}>{sec.name}</span>
               <span style={{...S.ven, color:c.ink}}>📍 {ven.name}</span>
               {it.disc && <span style={{...S.disc, color:c.muted}}>+ diskuse</span>}
               {tk && <span style={{...S.tkTag, color:TICKET[tk].c, borderColor:TICKET[tk].c}}>{TICKET[tk].i} {TICKET[tk].l}</span>}
@@ -96,10 +96,9 @@ export default function ProgramView({ day, q, setQ, secFilter, setSecFilter, pic
         )}
 
         <div style={{...S.chipRow, marginBottom:8}}>
-          <Chip active={!badgeFilter} label="Vše" onClick={() => setBadgeFilter("")} c={c} />
-          {Object.entries(BADGE_LABELS).map(([k, v]) => (
-            <Chip key={k} active={badgeFilter === k} label={v} dot={badgeColor(k)} onClick={() => setBadgeFilter(badgeFilter === k ? "" : k)} c={c} />
-          ))}
+          <Chip active={!pickFilter} label="Vše" onClick={() => setPickFilter("")} c={c} />
+          <Chip active={pickFilter === "our"} label="Tipy" dot={c.ok} onClick={() => setPickFilter(pickFilter === "our" ? "" : "our")} c={c} />
+          <Chip active={pickFilter === "yes"} label="Top" dot={c.ok} onClick={() => setPickFilter(pickFilter === "yes" ? "" : "yes")} c={c} />
         </div>
 
         <div style={S.chipRow}>

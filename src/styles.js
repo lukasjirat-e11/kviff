@@ -4,7 +4,7 @@ export const COLORS = {
   ink:     "#F4EFE7",
   muted:   "#A89D8E",
   line:    "#332D27",
-  accent:  "#E8A33D",
+  accent:  "#E02D3C",
   ok:      "#6FB36F",
   warn:    "#E8A33D",
   bad:     "#E06A4E",
