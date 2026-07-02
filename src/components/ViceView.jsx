@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { VENUES, TICKET } from "../data.js";
+import { VENUES, TICKET, FILMS } from "../data.js";
 import { COLORS, S } from "../styles.js";
 
 export default function ViceView({ ratings, rate, setDetail, people, setPeople, expenses, setExpenses }) {
@@ -9,7 +9,7 @@ export default function ViceView({ ratings, rate, setDetail, people, setPeople, 
   return (
     <div style={{padding:"12px 14px 36px"}}>
       <div style={{display:"flex", gap:6, marginBottom:14}}>
-        {[["utraty","Útraty"],["listky","Vstupenky"],["prakt","Praktické"]].map(([k, l]) => (
+        {[["utraty","Útraty"],["listky","Vstupenky"],["prakt","Praktické"],["denik","Deník"]].map(([k, l]) => (
           <button key={k} onClick={() => setSub(k)} style={{...S.miniChip, flex:1, background:sub === k ? c.accent : "transparent", color:sub === k ? c.bg : c.muted, borderColor:sub === k ? c.accent : c.line}}>{l}</button>
         ))}
       </div>
@@ -38,6 +38,54 @@ export default function ViceView({ ratings, rate, setDetail, people, setPeople, 
       )}
 
       {sub === "prakt" && <InfoView c={c} />}
+      {sub === "denik" && <Denik c={c} ratings={ratings} setDetail={setDetail} />}
+    </div>
+  );
+}
+
+function Denik({ c, ratings, setDetail }) {
+  const entries = Object.entries(ratings || {})
+    .filter(([, r]) => r.stars > 0 || (r.note && r.note.trim()))
+    .map(([fid, r]) => ({ fid, film: FILMS[fid], stars: r.stars || 0, note: r.note || "" }))
+    .filter(e => e.film)
+    .sort((a, b) => b.stars - a.stars || a.film.t.localeCompare(b.film.t, "cs"));
+  const best = entries.filter(e => e.stars === 5);
+
+  if (entries.length === 0) {
+    return (
+      <div style={{padding:"8px 2px 24px", textAlign:"center", color:c.muted}}>
+        <div style={{fontSize:38, marginBottom:8}}>📔</div>
+        <p style={{margin:0, color:c.ink, fontWeight:600}}>Zatím žádná hodnocení</p>
+        <p style={{marginTop:6}}>Hvězdičky přidáš v detailu filmu nebo v Plánu po projekci — objeví se tu.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {best.length > 0 && <>
+        <h3 style={{...S.h3, marginTop:0}}>🏆 Nejlepší</h3>
+        {best.map(e => (
+          <div key={e.fid} style={{...S.bestCard, background:c.surface, borderColor:c.accent}}>
+            <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", gap:8}}>
+              <b style={{color:c.ink}}>{e.film.t}</b>
+              <span style={{color:c.accent, flexShrink:0}}>{"★".repeat(e.stars)}</span>
+            </div>
+            {e.note && <div style={{color:c.muted, marginTop:4}}>{e.note}</div>}
+          </div>
+        ))}
+      </>}
+
+      <h3 style={S.h3}>📔 Deník</h3>
+      {entries.map(e => (
+        <button key={e.fid} onClick={() => setDetail(e.fid)} style={{...S.denikRow, borderColor:c.line, color:c.ink, marginBottom:8}}>
+          <div style={{flex:1, minWidth:0}}>
+            <div style={{fontWeight:700, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap"}}>{e.film.t}</div>
+            {e.note && <div style={{fontSize:12.5, color:c.muted, marginTop:2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap"}}>{e.note}</div>}
+          </div>
+          <span style={{color: e.stars > 0 ? c.accent : c.line, flexShrink:0, fontSize:15}}>{e.stars > 0 ? "★".repeat(e.stars) : "—"}</span>
+        </button>
+      ))}
     </div>
   );
 }

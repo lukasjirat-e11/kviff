@@ -30,19 +30,27 @@ export default function PlanView({ day, picked, toggle, setDetail, tickets, cycl
       </div>
       <div style={{...S.planTop}}>
         <span style={{color:c.muted, fontSize:13}}>
-          {items.length ? `${items.length} položek · ${fmtDur(totalRuntime)}` : "Plán je prázdný"}
+          {items.length
+            ? (planMode === "chceme" ? `${items.length} tipů na den · ${fmtDur(totalRuntime)} dohromady` : `${items.length} položek · ${fmtDur(totalRuntime)}`)
+            : (planMode === "chceme" ? "Žádné tipy na tento den" : "Plán je prázdný")}
         </span>
         <button onClick={() => setWeather(weather === "sun" ? "rain" : "sun")} style={{...S.wxBtn, borderColor:c.line, color:c.ink}}>
           {weather === "sun" ? "☀️ slunečno" : "🌧️ déšť"}
         </button>
       </div>
 
-      {(overbooked || conflicts > 0) && (
-        <div style={{...S.warnCard, borderColor:c.bad, color:c.ink}}>
-          {conflicts > 0 && <div>⚠️ {conflicts}× to mezi filmy <b>nestihneš</b> — překryv nebo moc krátký přesun.</div>}
-          {overbooked && <div>🍽️ Den je nabitý — nejdelší pauza na jídlo je jen <b>{maxGap} min</b>. Zvaž vynechat jeden film.</div>}
-        </div>
-      )}
+      {planMode === "chceme"
+        ? conflicts > 0 && (
+            <div style={{...S.warnCard, borderColor:c.line, color:c.ink}}>
+              <div>🎯 {conflicts}× se ti tipy <b>překrývají</b> v čase — je to normální, je jich hodně. Přes <b style={{color:c.ok}}>+</b> u filmu vyber, co jde do tvého plánu.</div>
+            </div>
+          )
+        : (overbooked || conflicts > 0) && (
+            <div style={{...S.warnCard, borderColor:c.bad, color:c.ink}}>
+              {conflicts > 0 && <div>⚠️ {conflicts}× to mezi filmy <b>nestihneš</b> — překryv nebo moc krátký přesun.</div>}
+              {overbooked && <div>🍽️ Den je nabitý — nejdelší pauza na jídlo je jen <b>{maxGap} min</b>. Zvaž vynechat jeden film.</div>}
+            </div>
+          )}
 
       {items.length === 0 ? (
         <div style={{padding:"36px 22px", textAlign:"center", color:c.muted}}>
@@ -84,7 +92,7 @@ export default function PlanView({ day, picked, toggle, setDetail, tickets, cycl
                   </div>
                 </div>
                 {seg && bigGap && <GapBlock seg={seg} from={it} weather={weather} c={c} setTab={setTab} />}
-                {seg && !bigGap && <PlanTransfer seg={seg} from={it} to={next} c={c} />}
+                {seg && !bigGap && <PlanTransfer seg={seg} from={it} to={next} c={c} chceme={planMode === "chceme"} />}
               </li>
             );
           })}
@@ -118,16 +126,20 @@ export default function PlanView({ day, picked, toggle, setDetail, tickets, cycl
   );
 }
 
-function PlanTransfer({ seg, from, to, c }) {
-  let msg;
-  if (seg.gap < 0) msg = `Překryv ${-seg.gap} min`;
+function PlanTransfer({ seg, from, to, c, chceme }) {
+  const unresolved = chceme && seg.color === c.bad;
+  let msg, code = seg.code;
+  if (unresolved) {
+    msg = seg.gap < 0 ? `Souběh ${-seg.gap} min — vyber jeden z nich` : `Na přesun moc málo času — vyber jeden z nich`;
+    code = "vyber";
+  } else if (seg.gap < 0) msg = `Překryv ${-seg.gap} min`;
   else if (seg.same) msg = `Stejné místo · ${seg.gap} min pauza`;
   else msg = `${VENUES[from.v].short} → ${VENUES[to.v].short} · ~${seg.walk} min pěšky · máš ${seg.gap} min`;
   return (
     <div style={{...S.transfer, color:c.muted}}>
       <span style={{...S.transferDot, background:seg.color}} />
       <span style={{flex:1}}>{msg}</span>
-      <span style={{...S.statusPill, color:c.bg, background:seg.color}}>{seg.code}</span>
+      <span style={{...S.statusPill, color:c.bg, background:seg.color}}>{code}</span>
     </div>
   );
 }

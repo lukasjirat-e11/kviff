@@ -7,7 +7,6 @@ export default function Detail({ filmId, onClose, picked, toggle, setDay, setTab
   const c = COLORS; const f = FILMS[filmId]; const sec = SECTIONS[f.s];
   const shows = SCR.filter(s => s.f === filmId).sort((a, b) => a.day - b.day || toMin(a.t) - toMin(b.t));
   const r = ratings[filmId] || {};
-  const [note, setNote] = useState(r.note || "");
   const [dragY, setDragY] = useState(0);
   const touchStartY = useRef(0);
   const isDragging = useRef(false);
@@ -48,12 +47,12 @@ export default function Detail({ filmId, onClose, picked, toggle, setDay, setTab
           <div style={{...S.showsHead, color:c.muted, marginBottom:6}}>Moje hodnocení (divácká cena)</div>
           <div style={{display:"flex", gap:4, marginBottom:8}}>
             {[1,2,3,4,5].map(n => (
-              <button key={n} onClick={() => rate(filmId, r.stars === n ? 0 : n, note)}
+              <button key={n} onClick={() => rate(filmId, r.stars === n ? 0 : n, r.note)}
                 style={{...S.star, color: (r.stars||0) >= n ? c.accent : c.line}}>★</button>
             ))}
             {r.stars > 0 && <span style={{color:c.muted, fontSize:13, alignSelf:"center", marginLeft:6}}>{r.stars}/5</span>}
           </div>
-          <input value={note} onChange={e => setNote(e.target.value)} onBlur={() => rate(filmId, r.stars||0, note)}
+          <input value={r.note || ""} onChange={e => rate(filmId, r.stars||0, e.target.value)}
             placeholder="Poznámka po projekci…" style={{...S.search, marginBottom:0, background:c.bg, color:c.ink, borderColor:c.line}} />
         </div>
 
