@@ -19,7 +19,11 @@ const TABS = [
 
 export default function App() {
   const [tab, setTab]         = useState("program");
-  const [day, setDay]         = useState(8);
+  const [day, setDay]         = useState(() => {
+    const now = new Date();
+    const today = DAYS.find(d => now.getMonth() === 6 && now.getDate() === d.d);
+    return today ? today.d : 8;
+  });
   const [picked, setPicked]   = useState(() => new Set());
   const [detail, setDetail]   = useState(null);
   const [q, setQ]             = useState("");
@@ -74,7 +78,7 @@ export default function App() {
     let n = 0;
     DAYS.forEach(({ d }) => {
       const its = buildDayItems(d, picked, blocks);
-      for (let i = 0; i < its.length - 1; i++) { if (segInfo(its[i], its[i+1]).gap < 0) n++; }
+      for (let i = 0; i < its.length - 1; i++) { if (segInfo(its[i], its[i+1]).color === c.bad) n++; }
     });
     return n;
   }, [picked, blocks]);

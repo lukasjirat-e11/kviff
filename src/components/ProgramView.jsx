@@ -58,7 +58,7 @@ export default function ProgramView({ day, q, setQ, secFilter, setSecFilter, pic
         <div style={{display:"flex", flexDirection:"column"}}>
           <button onClick={() => toggle(it.id)} style={{...S.addBtn, flex:1, background: on ? c.accent : "transparent", color: on ? c.bg : c.accent, borderColor:c.accent}}>{on ? "✓" : "+"}</button>
           {it.kind === "film" && <button onClick={() => cycleTicket(it.id)} title="Vstupenka"
-            style={{...S.tkBtn, color: tk ? TICKET[tk].c : c.muted, borderColor:c.line}}>{tk ? TICKET[tk].i : "🎟"}</button>}
+            style={{...S.tkBtn, flex:1, color: tk ? TICKET[tk].c : c.muted, borderColor:c.line}}>{tk ? TICKET[tk].i : "🎟"}</button>}
         </div>
       </li>
     );

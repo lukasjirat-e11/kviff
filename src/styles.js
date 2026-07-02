@@ -43,7 +43,7 @@ export const S = {
   sec:       { fontSize:11, fontWeight:600, padding:"2px 8px", borderRadius:6, border:"1px solid" },
   ven:       { fontSize:12 },
   disc:      { fontSize:11 },
-  addBtn:    { width:46, flexShrink:0, border:"none", borderLeft:"1px solid", fontSize:20, fontWeight:700, cursor:"pointer" },
+  addBtn:    { width:46, minHeight:44, flexShrink:0, border:"none", borderLeft:"1px solid", fontSize:20, fontWeight:700, cursor:"pointer" },
   // plan
   planSummary: { padding:"10px 18px 4px", fontSize:13 },
   timeline:  { listStyle:"none", margin:0, padding:"4px 12px" },
@@ -79,7 +79,7 @@ export const S = {
   rateBox:     { borderRadius:12, border:"1px solid", padding:"12px 14px", margin:"4px 0 18px" },
   star:        { background:"none", border:"none", fontSize:28, lineHeight:1, cursor:"pointer", padding:0 },
   tkTag:       { fontSize:11, fontWeight:700, padding:"2px 7px", borderRadius:6, border:"1px solid" },
-  tkBtn:       { width:46, border:"none", borderLeft:"1px solid", borderTop:"1px solid", background:"transparent", fontSize:15, cursor:"pointer" },
+  tkBtn:       { width:46, minHeight:44, border:"none", borderLeft:"1px solid", borderTop:"1px solid", background:"transparent", fontSize:15, cursor:"pointer" },
   tkBtnSm:     { width:40, height:40, borderRadius:10, border:"1px solid", background:"transparent", fontSize:16, cursor:"pointer" },
   // map
   mapSel:      { margin:"12px 12px 0", padding:"12px 14px", borderRadius:12, border:"1px solid" },

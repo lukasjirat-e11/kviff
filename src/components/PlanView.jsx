@@ -18,7 +18,7 @@ export default function PlanView({ day, picked, toggle, setDetail, tickets, cycl
   let maxGap = 0;
   for (let i = 0; i < items.length - 1; i++) { const g = segInfo(items[i], items[i+1]); if (g.gap > maxGap) maxGap = g.gap; }
   const overbooked = films.length >= 4 && maxGap < 60;
-  const conflicts = (() => { let n = 0; for (let i = 0; i < items.length - 1; i++) { if (segInfo(items[i], items[i+1]).gap < 0) n++; } return n; })();
+  const conflicts = (() => { let n = 0; for (let i = 0; i < items.length - 1; i++) { if (segInfo(items[i], items[i+1]).color === c.bad) n++; } return n; })();
 
   const removeBlock = (id) => setBlocks(b => b.filter(x => x.id !== id));
 
@@ -39,8 +39,8 @@ export default function PlanView({ day, picked, toggle, setDetail, tickets, cycl
 
       {(overbooked || conflicts > 0) && (
         <div style={{...S.warnCard, borderColor:c.bad, color:c.ink}}>
-          {conflicts > 0 && <div>⚠️ {conflicts}× se ti filmy <b>překrývají</b> — něco nestihneš celé.</div>}
-          {overbooked && <div>🍽️ Den je nabitý a nemáš <b>žádnou pauzu na jídlo</b> (max {maxGap} min). Zvaž vynechat jeden film.</div>}
+          {conflicts > 0 && <div>⚠️ {conflicts}× to mezi filmy <b>nestihneš</b> — překryv nebo moc krátký přesun.</div>}
+          {overbooked && <div>🍽️ Den je nabitý — nejdelší pauza na jídlo je jen <b>{maxGap} min</b>. Zvaž vynechat jeden film.</div>}
         </div>
       )}
 
